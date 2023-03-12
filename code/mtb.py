@@ -1,12 +1,16 @@
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 import math
+from PIL import Image
 
 class MTB():
     '''Median Threshold Bitmap image alignment'''
-    def __init__(self, stage):
-        self.stage = stage # indicate how many stage of downscaling. eg: stage = 4, image pool scale: [1, 1/4, 1/16, 1/64]
+    def __init__(self, stage=8):
+        '''
+        stage: indicate how many stage of downscaling. eg: stage = 4, image pool scale: [1, 1/4, 1/16, 1/64]
+        recommend to set as 8, max coverage of shifting = 2^8 = 256 pixel per axis.
+        '''
+        self.stage = stage 
 
     def rgb2gray(self, img):
         Y = 54/256*img[:,:,0] + 183/256*img[:,:,1] + 19/256*img[:,:,2]
@@ -52,9 +56,8 @@ class MTB():
                     offset = (dy,dx)
         return offset
     
-    def mtb(self, img1, img2):
+    def align2image(self, img1, img2):
         '''
-        main function here
         fix img1 position, calculate the offset for img2 to be aligned with img1
         '''
         gray1 = self.rgb2gray(img1)
@@ -77,16 +80,35 @@ class MTB():
             
             for i in range(scale+1, self.stage):
                 idx = self.stage-1-i
-                mask2_list[idx] = self.shift(mask2_list[idx], curr_offset[1]*2*(i-scale), curr_offset[0]*2*(i-scale))
+                mask2_list[idx] = self.shift(mask2_list[idx], curr_offset[1]*(2**(i-scale)), curr_offset[0]*(2**(i-scale)))
 
         offsets.reverse()
         total_offset = [0,0]
         for i in range(len(offsets)):
             total_offset[0] += offsets[i][0] * (2**i)
             total_offset[1] += offsets[i][1] * (2**i)
-        print(f'(MTB) offsets are y:{total_offset[0]} x:{total_offset[1]}')
+        print(f'offsets are y:{total_offset[0]} x:{total_offset[1]}')
         return total_offset
+    
+    def run(self, imgs: list, isSaveImage=False):
+        '''
+        main function here
+        - input:
+        :-- imgs: list of numpy arrays, which are the images to be aligned
+        :-- isSaveImage: optional, set True to save the aligned images (for debug and checking)
+        - output:
+        :-- imgs: list of numpy arrays, which are the aligned images
+        '''
+        for i in range(1,len(imgs)):
+            offsets = self.align2image(imgs[i-1], imgs[i])
+            imgs[i] = self.shift(imgs[i], offsets[1], offsets[0])
 
+        if isSaveImage:
+            for i in range(len(imgs)):
+                img = Image.fromarray(imgs[i])
+                img.save(f'{i}.jpg')
+
+        return imgs
 
 # for debug
 if __name__ == '__main__':
