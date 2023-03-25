@@ -49,7 +49,7 @@ def main(args):
     if not args.disable_mtb:
         mtb = MTB(6)
         print('running MTB...')
-        shift_imgs = mtb.run(imgs, True) # list of numpy array, which are the aligned images
+        shift_imgs = mtb.run(imgs, False) # list of numpy array, which are the aligned images
     else:
         shift_imgs = imgs
 

@@ -85,8 +85,8 @@ class tone_mapping_Reinhard():
         :-- global_op_result: numpy array of global tone mapping operation result
         :-- local_op_result: numpy array of local tone mapping operation result
         '''
-        global_op_result, Lm = toneMapping.global_ops(irradiance_map)
-        local_op_result = toneMapping.local_ops(Lm, global_op_result)
+        global_op_result, Lm = self.global_ops(irradiance_map)
+        local_op_result = self.local_ops(Lm, global_op_result)
         return global_op_result, local_op_result
                 
 
