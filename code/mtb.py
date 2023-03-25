@@ -106,7 +106,7 @@ class MTB():
         if isSaveImage:
             for i in range(len(imgs)):
                 img = Image.fromarray(imgs[i])
-                img.save(f'{i}.jpg')
+                img.save(f'./../data/output/mtb_{i}.jpg')
 
         return imgs
 

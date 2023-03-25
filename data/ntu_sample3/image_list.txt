@@ -1,0 +1,10 @@
+# Number of Images
+15
+# Filename  1/shutter_speed f/stop gain(db) ND_filters
+_C4A1522.JPG 2  10 0 0
+_C4A1523.JPG 3.3333  10 0 0
+_C4A1524.JPG 6  10 0 0
+_C4A1525.JPG 15  10 0 0
+_C4A1526.JPG 30   10 0 0
+_C4A1527.JPG 60   10 0 0
+_C4A1528.JPG 125   10 0 0
