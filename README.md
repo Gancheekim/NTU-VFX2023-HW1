@@ -26,11 +26,11 @@ Note:
 ## Results:
 ### ntu_sample1:
 - original captured images:  
-<img src="data/ntu_sample1/_C4A1568.JPG" height="256">
-<img src="data/ntu_sample1/_C4A1571.JPG" height="256">
-<br/>
-<img src="data/ntu_sample1/_C4A1573.JPG" height="256">
-<img src="data/ntu_sample1/_C4A1575.JPG" height="256">
+
+<img src="data/ntu_sample1/_C4A1568.JPG" height="256"> <img src="data/ntu_sample1/_C4A1571.JPG" height="256">
+</br>
+<img src="data/ntu_sample1/_C4A1573.JPG" height="256"> <img src="data/ntu_sample1/_C4A1575.JPG" height="256">
+
 - calculated irradiance map:  
 <img src="data/output/rad_ntu_sample1.png" height="512">
 - reconstructed HDR images:  
@@ -38,11 +38,9 @@ Note:
 
 ### ntu_sample3:
 - original captured images:  
-<img src="data/ntu_sample3/_C4A1528.JPG" height="256">
-<img src="data/ntu_sample3/_C4A1526.JPG" height="256">
+<img src="data/ntu_sample3/_C4A1528.JPG" height="256"> <img src="data/ntu_sample3/_C4A1526.JPG" height="256">
 <br/>
-<img src="data/ntu_sample3/_C4A1524.JPG" height="256">
-<img src="data/ntu_sample3/_C4A1522.JPG" height="256">
+<img src="data/ntu_sample3/_C4A1524.JPG" height="256"> <img src="data/ntu_sample3/_C4A1522.JPG" height="256">
 - calculated irradiance map:  
 <img src="data/output/rad_ntu_sample3.png" height="512">
 - reconstructed HDR images:  
