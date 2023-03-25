@@ -1,10 +1,13 @@
+import math
+import cv2
 import numpy as np
-from PIL import Image
 import matplotlib.pyplot as plt
+from PIL import Image
 from argparse import ArgumentParser
 from mtb import MTB
 
-import math
+# Paths
+output_dir = "./../data/output/"
 
 def getDatasetImageName(dataset):
     if dataset == "memorial":
@@ -117,6 +120,48 @@ def get_response_func(Z_samples, B, Lambda, w):
     return g_funcs, lsq_errors
 
 
+def get_hdr(imgs_list, g_funcs, ln_exp_times, weight, W, H, C, P):
+    # Separate the images by channel
+    imgs_R = [img[:,:,0] for img in imgs_list]  # shape: P x H x W  red channel
+    imgs_G = [img[:,:,1] for img in imgs_list]  # shape: P x H x W  green channel
+    imgs_B = [img[:,:,2] for img in imgs_list]  # shape: P x H x W  blue channel
+    imgs_RGB = [imgs_R, imgs_G, imgs_B]
+
+    # Generate HDR image
+    hdr_img = np.zeros(shape=(H, W, C), dtype=np.float32)   # initialize array
+    for c, img_list in enumerate(imgs_RGB):
+        Z = [img.flatten().tolist() for img in img_list]   # flatten length = H*W
+        g = g_funcs[c]
+        
+        # Get ln(E)
+        num_pixels = H*W
+        ln_E      = np.zeros(num_pixels)
+        
+        for i in range(num_pixels):
+            sum_numerator = 0
+            sum_denominator = 0          # sum from image 1 to P, of weight(Zij)
+            for j in range(P):
+                Zij    = Z[j][i]         # value at pixel i, of image j 
+                w_Zij  = weight[Zij]     # weight for pixel i, of image j        
+                g_Zij  = g[Zij]          # response for pixel i, of image j
+                ln_t_j = ln_exp_times[j] # log_2 of exposure time, of image j
+                
+                # Iterate through all images, and do summation
+                sum_numerator   += (w_Zij * (g_Zij - ln_t_j))
+                sum_denominator += w_Zij
+                # print(f"sum_numerator: {sum_numerator}")
+                # print(f"sum_denominator: {sum_denominator}")
+            
+            # Get ln(Ei)
+            ln_Ei = sum_numerator / sum_denominator  # irradiance at pixel i
+            ln_E[i] = ln_Ei                          # set in ln_E
+        
+        # Get E
+        E = np.exp(ln_E).reshape((H,W))  # shape: H x W, irradiance computed from all images in dataset, for this channel
+        hdr_img[..., c] = E              # generate HDR image channel-by-channel
+
+    # HDR Generation Complete
+    return hdr_img
 
 def plot_response_curve(g_funcs):
     plt.figure(figsize=(5,5))
@@ -126,9 +171,16 @@ def plot_response_curve(g_funcs):
     plt.plot(g_func_b, range(256), 'blue')
     plt.ylabel("Pixel Value Z")
     plt.xlabel("Log Exposure x")
-    plt.savefig("responsecurve.png")
+    plt.savefig(output_dir + "responsecurve.png")
 
-def get_hdr_debevec(imgs_list, exp_time_list, P, N=20):
+def plot_radiance_map(hdr_image):
+    plt.figure()
+    plt.imshow(np.log(cv2.cvtColor(hdr_image, cv2.COLOR_RGB2GRAY)), cmap='turbo') # convert hrd to grayscale otherwise the result is not heatmap
+    plt.colorbar()
+    plt.tight_layout()
+    plt.savefig(output_dir + "radiance_map.png")
+
+def debevec(imgs_list, exp_time_list, P, N=20):
     '''
     1. Sample from each channel of each images
     2. Find function g() of each channel
@@ -163,12 +215,26 @@ def get_hdr_debevec(imgs_list, exp_time_list, P, N=20):
     # Plot g Curves
     plot_response_curve(g_funcs)
 
-    return 0
+    # Get HDR image
+    hdr_img = get_hdr(
+        imgs_list = imgs_list,
+        g_funcs   = g_funcs,
+        ln_exp_times = B,
+        weight = weight, 
+        W = W,
+        H = H,
+        C = C,
+        P = P,
+    )
+    plot_radiance_map(hdr_img)
+
+    return hdr_img
 
 
 
 #========================================================================================================================
 def main(args):
+    
     imgs_name = getDatasetImageName(args.dataset)
     imgs = [np.asarray(Image.open(img_name).convert('RGB')) for img_name in imgs_name] # read image as numpy array
 
@@ -178,8 +244,8 @@ def main(args):
     # TODO: finish HDR algorithm
     exps = get_exposure(args.dataset_info)   # list of exposure times for all images
     P    = len(exps)                         # number of images
-    hdr_images = get_hdr_debevec(imgs, exps, P, args.N)
-
+    hdr_img = debevec(imgs, exps, P, args.N)
+    cv2.imwrite(output_dir + "hdr_image.hdr", hdr_img)
         
     return
 

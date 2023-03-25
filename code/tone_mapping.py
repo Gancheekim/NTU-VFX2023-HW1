@@ -92,25 +92,29 @@ class tone_mapping_Reinhard():
 
 
 if __name__ == "__main__":
-    hdr_path = "./../data/debug/sample_hdr2.hdr"
-
+    #hdr_path = "./../data/debug/sample_hdr2.hdr"
+    hdr_path = "./../data/output/hdr_image.hdr"
     # IMREAD_ANYDEPTH is needed because even though the data is stored in 8-bit channels
     # when it's read into memory it's represented at a higher bit depth
     img1 = cv2.imread(hdr_path, flags=cv2.IMREAD_ANYDEPTH)
     img = np.empty_like(img1)
+    
     # bgr to rgb
     img[:,:,0] = img1[:,:,2] 
     img[:,:,1] = img1[:,:,1]
     img[:,:,2] = img1[:,:,0]
+
+    # Using our own Debevec method to generate hdr, the channels are already in RGB
+    img = img1
 
     toneMapping = tone_mapping_Reinhard(key=0.5)
     global_tone, local_tone = toneMapping.run(img)
 
     from PIL import Image
     tmp = Image.fromarray(np.uint8(global_tone*255))
-    tmp.save('global_op.png')
+    tmp.save('./../data/output/global_op.png')
     tmp = Image.fromarray(np.uint8(local_tone*255))
-    tmp.save('local_op.png')
+    tmp.save('./../data/output/local_op.png')
 
     for c in range(3):
         img[:,:,c] = toneMapping.normalize(img[:,:,c])
