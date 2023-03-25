@@ -131,7 +131,7 @@ if __name__ == "__main__":
     plt.subplot(1,4,4)
     plt.imshow(ldrReinhard)
 
-    plt.show()
+    # plt.show()
 
 
 

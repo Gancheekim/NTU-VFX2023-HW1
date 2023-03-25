@@ -19,6 +19,11 @@ def getDatasetImageName(dataset):
         prefix_name = "./../data/debug/p"
         sufix_name = ".jpg"
         imgs_name = [prefix_name+str(idx)+sufix_name for idx in range(1,5)]
+
+    if dataset == "ntu_sample1":
+        prefix_name = "./../data/ntu_sample1/_C4A15"
+        sufix_name = ".JPG"
+        imgs_name = [prefix_name+str(idx)+sufix_name for idx in range(63,78)]
     
     return imgs_name
 
@@ -231,6 +236,14 @@ def debevec(imgs_list, exp_time_list, P, N=20):
     return hdr_img
 
 
+def resize_imgs(imgs, new_H=1080):
+    resized_imgs = []
+    H,W,C = imgs[0].shape
+    new_W = int(W * new_H/H)
+    for img in imgs:
+        img = cv2.resize(img, (new_W, new_H), interpolation=cv2.INTER_AREA)
+        resized_imgs.append(img)
+    return resized_imgs
 
 #========================================================================================================================
 def main(args):
@@ -238,12 +251,16 @@ def main(args):
     imgs_name = getDatasetImageName(args.dataset)
     imgs = [np.asarray(Image.open(img_name).convert('RGB')) for img_name in imgs_name] # read image as numpy array
 
-    #mtb = MTB(8)
-    #shift_imgs = mtb.run(imgs, True) # list of numpy array, which are the aligned images
+    imgs = resize_imgs(imgs, 768)
+    mtb = MTB(8)
+    print('running MTB...')
+    # shift_imgs = mtb.run(imgs, True) # list of numpy array, which are the aligned images
 
+    print('reading exposure of imgs...')
     # TODO: finish HDR algorithm
     exps = get_exposure(args.dataset_info)   # list of exposure times for all images
     P    = len(exps)                         # number of images
+    print('running debevec...')
     hdr_img = debevec(imgs, exps, P, args.N)
     cv2.imwrite(output_dir + "hdr_image.hdr", hdr_img)
         
@@ -252,7 +269,7 @@ def main(args):
 if __name__ == '__main__':
     parser = ArgumentParser()
     '''add argument here'''
-    parser.add_argument("--dataset", type=str, default="debug", choices=["memorial", "debug"]) # currently debug mode is for testing MTB
+    parser.add_argument("--dataset", type=str, default="debug", choices=["memorial", "debug", "ntu_sample1"]) # currently debug mode is for testing MTB
     parser.add_argument("--dataset_info", type=str, default="./../data/memorial/memorial.hdr_image_list.txt", help="Path to text file with info about dataset exposure times.")
     parser.add_argument("--N", type=int, default=20, help="Number of sample points per image, per channel.")
     args = parser.parse_args()
