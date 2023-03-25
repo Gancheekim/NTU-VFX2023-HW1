@@ -119,14 +119,14 @@ def get_response_func(Z_samples, B, Lambda, w):
 
 
 def plot_response_curve(g_funcs):
-    plt.figure(figsize=(10,10))
+    plt.figure(figsize=(5,5))
     g_func_r, g_func_g, g_func_b = g_funcs
     plt.plot(g_func_r, range(256), 'red')
     plt.plot(g_func_g, range(256), 'green')
     plt.plot(g_func_b, range(256), 'blue')
     plt.ylabel("Pixel Value Z")
     plt.xlabel("Log Exposure x")
-    plt.savefig("testcurve.png")
+    plt.savefig("responsecurve.png")
 
 def get_hdr_debevec(imgs_list, exp_time_list, P, N=20):
     '''
@@ -175,13 +175,10 @@ def main(args):
     #mtb = MTB(8)
     #shift_imgs = mtb.run(imgs, True) # list of numpy array, which are the aligned images
 
-    memorial_txt_path = "./../data/memorial/memorial.hdr_image_list.txt"
-
     # TODO: finish HDR algorithm
-    N    = 20                                # number of sample point pixels per image
-    exps = get_exposure(memorial_txt_path)   # list of exposure times for all images
+    exps = get_exposure(args.dataset_info)   # list of exposure times for all images
     P    = len(exps)                         # number of images
-    hdr_images = get_hdr_debevec(imgs, exps, P, N)
+    hdr_images = get_hdr_debevec(imgs, exps, P, args.N)
 
         
     return
@@ -190,6 +187,8 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     '''add argument here'''
     parser.add_argument("--dataset", type=str, default="debug", choices=["memorial", "debug"]) # currently debug mode is for testing MTB
+    parser.add_argument("--dataset_info", type=str, default="./../data/memorial/memorial.hdr_image_list.txt", help="Path to text file with info about dataset exposure times.")
+    parser.add_argument("--N", type=int, default=20, help="Number of sample points per image, per channel.")
     args = parser.parse_args()
     main(args)
 
