@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 
 class tone_mapping_Reinhard():
     def __init__(self, key=0.18, Lwhite=0., sigma=0.000001, gamma=1/2, phi=8.0, a=1.0, base_sigma=0.5, eps=0.001):
@@ -72,7 +73,7 @@ class tone_mapping_Reinhard():
         Lw = self.rgb2gray(irradiance_img)
         hdr_img = np.zeros_like(irradiance_img)
         for c in range(3):
-            hdr_img[:,:,c] =  Ld * irradiance_img[:,:,c] / Lw
+            hdr_img[:,:,c] =  Ld * irradiance_img[:,:,c] / (Lw + 0.000001)
         hdr_img = np.clip(hdr_img, 0.0, 1.0)
         return np.nan_to_num(hdr_img)
     
@@ -92,6 +93,7 @@ class tone_mapping_Reinhard():
 
 
 if __name__ == "__main__":
+    
     #hdr_path = "./../data/debug/sample_hdr2.hdr"
     hdr_path = "./../data/output/hdr_image.hdr"
     # IMREAD_ANYDEPTH is needed because even though the data is stored in 8-bit channels
@@ -106,11 +108,10 @@ if __name__ == "__main__":
 
     # Using our own Debevec method to generate hdr, the channels are already in RGB
     img = img1
-
+    # '''
     toneMapping = tone_mapping_Reinhard(key=0.5)
     global_tone, local_tone = toneMapping.run(img)
 
-    from PIL import Image
     tmp = Image.fromarray(np.uint8(global_tone*255))
     tmp.save('./../data/output/global_op.png')
     tmp = Image.fromarray(np.uint8(local_tone*255))
@@ -125,11 +126,15 @@ if __name__ == "__main__":
     plt.imshow(global_tone)
     plt.subplot(1,4,3)
     plt.imshow(local_tone)
-
-    tonemapReinhard = cv2.createTonemapReinhard(intensity=2.0, light_adapt=0.0, color_adapt=0.0)
+    # '''
+    tonemapReinhard = cv2.createTonemapReinhard(intensity=2.0, light_adapt=0.7, color_adapt=0.0)
     ldrReinhard = tonemapReinhard.process(img)
     plt.subplot(1,4,4)
     plt.imshow(ldrReinhard)
+
+    tmp = Image.fromarray(np.uint8(ldrReinhard*255))
+    tmp.save('./../data/output/opencv_reinhard.png')
+
 
     # plt.show()
 
