@@ -16,9 +16,14 @@ website: https://www.csie.ntu.edu.tw/~cyy/courses/vfx/21spring/assignments/proj1
 - 電信所碩一 顏子鈞
 - 電信所碩一 陳詠源
 
+## Dependencies:
+please install them using ```pip install -r requirements.txt```. packages used in our code:
+- numpy, pillow, opencv-python, matplotlib
+
 ## Execution:
 Generate HDR Image and Tonemapped LDR Image:
 ```
+$ cd code
 $ python main.py --dataset <name_of_dataset> --dataset_info <path_to_textfile> --N <num_of_samplepoints_per_image> --tm_key <key_to_control_tonemapping>
 ```
 Note:  
@@ -29,12 +34,7 @@ Note:
 - output files are all save at ```"data/output/"``` directory, including HDR irradiance map, camera response curve, tonemapped LDR image (global and local operation).
 
 
-## Dependencies:
-please install them using ```pip install -r requirements.txt```. packages used in our code:
-- numpy
-- pillow
-- cv2
-- matplotlib
+
 
 
 ## Results:
